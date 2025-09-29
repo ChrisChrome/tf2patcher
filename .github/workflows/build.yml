@@ -1,0 +1,49 @@
+name: Build tf2patcher
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - current
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        target: [32, 64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSYS2 & tooling
+        # We use msys2 to provide gcc/make etc on Windows
+        uses: msys2/setup-msys2@v3
+        with:
+          update: true
+          install: >
+            mingw-w64-i686-gcc
+            mingw-w64-x86_64-gcc
+            make
+
+      - name: Build for ${{ matrix.target }}-bit
+        shell: msys2 {0}
+        run: |
+          make clean || true
+          make TARGET=${{ matrix.target }}
+
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: tf2patcher-${{ matrix.target }}bit
+          path: |
+            tf2patcher.exe
+            *.dll
+            *.dll.config
+            # or whatever output files your Makefile produces
+
