@@ -31,7 +31,7 @@ jobs:
             make
 
       - name: Build for ${{ matrix.target }}-bit
-        shell: msys2
+        shell: bash
         run: |
           make clean || true
           make TARGET=${{ matrix.target }}
