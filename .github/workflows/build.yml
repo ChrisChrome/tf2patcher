@@ -16,34 +16,28 @@ jobs:
       matrix:
         target: [32, 64]
 
-    defaults:
-      run:
-        # Use msys2 shell by default for run steps
-        shell: msys2 {0}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup MSYS2 toolchain
-        uses: msys2/setup-msys2@v2.24.1
+        uses: msys2/setup-msys2@v2.22.0
         with:
-          # Choose msystem per architecture
           msystem: ${{ matrix.target == 32 && 'MINGW32' || 'MINGW64' }}
           update: true
-          install: >
+          install: |
             mingw-w64-i686-gcc
             mingw-w64-x86_64-gcc
             make
 
       - name: Build for ${{ matrix.target }}-bit
+        shell: msys2
         run: |
           make clean || true
           make TARGET=${{ matrix.target }}
 
       - name: Upload artifact
-        if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tf2patcher-${{ matrix.target }}bit
           path: |
